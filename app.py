@@ -9,7 +9,9 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password_hash = db.Column(db.String(200), nullable=False)
+
 @app.route("/register", methods=["POST", "GET"])
+
 def register():
     username = request.form["username"]
     password = request.form["password"]
@@ -18,6 +20,20 @@ def register():
     db.session.add(new_user)
     db.session.commit()
     return username
+
+@app.route("/login", methods=["POST", "GET"])
+def login():
+    username = request.form["username"]
+    password = request.form["password"]
+    user = User.query.filter_by(username=username).first()
+    if not user:
+        return "User not found"
+    if bcrypt.checkpw(password.encode("utf-8"), user.password_hash):
+        return "login successful"
+    else:
+        return "wrong password"
+
+
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
