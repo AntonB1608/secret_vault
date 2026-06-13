@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, render_template
 from flask_sqlalchemy import SQLAlchemy
 import bcrypt
 
@@ -13,14 +13,16 @@ class User(db.Model):
 @app.route("/register", methods=["POST", "GET"])
 
 def register():
-    username = request.form["username"]
-    password = request.form["password"]
-    password_hash = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
-    new_user = User(username=username, password_hash=password_hash)
-    db.session.add(new_user)
-    db.session.commit()
-    return username
-
+    if request.method == "POST":
+        username = request.form["username"]
+        password = request.form["password"]
+        password_hash = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
+        new_user = User(username=username, password_hash=password_hash)
+        db.session.add(new_user)
+        db.session.commit()
+        return username
+    else:
+        return render_template("register.html")
 @app.route("/login", methods=["POST", "GET"])
 def login():
     username = request.form["username"]
@@ -37,5 +39,5 @@ def login():
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5555, debug=True)
 
