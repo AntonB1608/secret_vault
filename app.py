@@ -25,19 +25,21 @@ def register():
         return render_template("register.html")
 @app.route("/login", methods=["POST", "GET"])
 def login():
-    username = request.form["username"]
-    password = request.form["password"]
-    user = User.query.filter_by(username=username).first()
-    if not user:
-        return "User not found"
-    if bcrypt.checkpw(password.encode("utf-8"), user.password_hash):
-        return "login successful"
+    if request.method == "POST":
+        username = request.form["username"]
+        password = request.form["password"]
+        user = User.query.filter_by(username=username).first()
+        if not user:
+            return "User not found"
+        if bcrypt.checkpw(password.encode("utf-8"), user.password_hash):
+            return "login successful"
+        else:
+            return "wrong password"
     else:
-        return "wrong password"
+        return render_template("login.html")
 
 
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
     app.run(host="0.0.0.0", port=5555, debug=True)
-
