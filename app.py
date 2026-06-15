@@ -13,12 +13,23 @@ class User(db.Model):
 @app.route("/register", methods=["POST", "GET"])
 
 def register():
+    sonderzeichen = "!@#$%^&*()_+-=[]{}|;:',.<>?/~`"
     if request.method == "POST":
         username = request.form["username"]
+        user_exists = User.query.filter_by(username=username).first()
+        if user_exists:
+            return "Username already taken"
         password = request.form["password"]
+
+        if len(password) < 15:
+            return("password to short")
+        has_sonderzeichen = any(zeichen in password for zeichen in sonderzeichen)
+        if not has_sonderzeichen:
+            return("password doesn't contain sonderzeichen")
+
         password_hash = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
         new_user = User(username=username, password_hash=password_hash)
-        db.session.add(new_user)
+        db.session.add(new_user)           
         db.session.commit()
         return username
     else:
