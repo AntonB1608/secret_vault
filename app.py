@@ -1,6 +1,7 @@
 from flask import Flask, request, render_template
 from flask_sqlalchemy import SQLAlchemy
 import bcrypt
+import datetime as dt
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///users.db"
@@ -9,9 +10,10 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password_hash = db.Column(db.String(200), nullable=False)
+    trys = db.Column(db.Integer, default=0)
+    locked_until = db.Column(db.DateTime, nullable=True)
 
 @app.route("/register", methods=["POST", "GET"])
-
 def register():
     sonderzeichen = "!@#$%^&*()_+-=[]{}|;:',.<>?/~`"
     if request.method == "POST":
@@ -36,16 +38,28 @@ def register():
         return render_template("register.html")
 @app.route("/login", methods=["POST", "GET"])
 def login():
+    current_date_time = dt.datetime.today()
     if request.method == "POST":
         username = request.form["username"]
         password = request.form["password"]
         user = User.query.filter_by(username=username).first()
         if not user:
             return "User not found"
+        if user.locked_until and current_date_time < user.locked_until:
+            return f"You are blocked until {user.locked_until}"
+        if user.locked_until and current_date_time > user.locked_until:
+            user.trys = 0
         if bcrypt.checkpw(password.encode("utf-8"), user.password_hash):
+            user.locked_until = None
+            db.session.commit()
             return "login successful"
-        else:
-            return "wrong password"
+        if not bcrypt.checkpw(password.encode("utf-8"), user.password_hash):
+            if not user.trys < 5:
+                return("Wrong password, try again")
+            else:
+                user.locked_until = dt.datetime.today() + dt.timedelta(minutes=15)
+                db.session.commit()
+                return "wrong password"
     else:
         return render_template("login.html")
 
