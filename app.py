@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, session
+from flask import Flask, request, render_template, session, redirect
 from flask_sqlalchemy import SQLAlchemy
 import bcrypt
 import datetime as dt
@@ -61,7 +61,7 @@ def login():
             user.locked_until = None
             session["username"] = username
             db.session.commit()
-            return "login successful"
+            return redirect("/vault")
         
         user.trys += 1
         if user.trys >= 5: 
@@ -79,6 +79,10 @@ def vault():
         return render_template("login.html")
     else:
         return render_template("vault.html")
+@app.route("/logout", methods = ["GET"])
+def logout():      
+    session.pop("username", None)
+    return redirect("/login")
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
