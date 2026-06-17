@@ -4,19 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>register</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <form method="POST" action="/register">
-    <label>Enter a username</label>
-    <input type = "text" name = "username">
-    <label>Enter a password</label>
-    <input type = "password" name = "password">
-    <label>repeat your password</label>
-    <input type = "password" name = "repeat_password">
-    <label>send</label>
-    <input type = "submit">
-    {{ fehlermeldung }}
-</form>
+    <div class = title> 
+        <h1> secret_vault</h1>
+    </div>
+    <div class = register>
+        <form method="POST" action="/register">
+            <div class = field>
+                <label></label>
+                <input type="text" name="username" placeholder="Enter a username">
+                <input type = "password" name = "password" placeholder = "Enter a password" {{ fehlermeldung }}>
+                <input type = "password" name = "repeat_password" placeholder = "Repeat your password" {{ fehlermeldung }}>
+                <input type = "submit" placeholder = "Send">
+                {{ fehlermeldung }}
+            </div>
+            
+    </form>
+    </div>
+    
     
 </body>
 </html>

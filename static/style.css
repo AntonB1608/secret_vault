@@ -1,0 +1,47 @@
+body {
+    display: flex;
+    background-color: #E0AFA0;
+    min-height: 100vh;
+    margin: 0;
+}
+.title {   
+    flex: 1.25;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+}
+h1 {
+    font-size: 6rem;
+    font-family: Impact, Haettenschweiler, 'Arial bold';
+
+}
+.register {
+    display: flex;
+    background-color: #F4F3EE;
+    flex: 0.75;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    min-height: 100vh;
+}
+.field {
+    padding: 3rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    background-color: #BCB8B1;
+    border-radius: 2rem;
+    font-family: cambria, cochin;
+    font-size: 2rem;
+}
+.label {
+    margin: 2rem;
+}
+input {
+    width: 100%;
+    padding: 0.5rem;
+    font-size: 1.5rem;
+    margin: 1rem;
+}
