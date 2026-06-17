@@ -30,10 +30,14 @@ def register():
             return("password doesn't contain sonderzeichen")
 
         password_hash = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
-        new_user = User(username=username, password_hash=password_hash)
-        db.session.add(new_user)           
-        db.session.commit()
-        return username
+        password_again = request.form["repeat_password"]
+        if password == password_again:
+            new_user = User(username=username, password_hash=password_hash)
+            db.session.add(new_user)           
+            db.session.commit()
+            return username
+        else:
+            return render_template("register.html", fehlermeldung = "passwords dont match")
     else:
         return render_template("register.html")
 @app.route("/login", methods=["POST", "GET"])
