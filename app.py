@@ -44,22 +44,23 @@ def login():
         password = request.form["password"]
         user = User.query.filter_by(username=username).first()
         if not user:
-            return "User not found"
+            return render_template("login.html", fehlermeldung = "User not found")
         if user.locked_until and current_date_time < user.locked_until:
-            return f"You are blocked until {user.locked_until}"
+            return render_template("login.html", fehlermeldung=f"You are blocked until {user.locked_until}")
         if user.locked_until and current_date_time > user.locked_until:
             user.trys = 0
         if bcrypt.checkpw(password.encode("utf-8"), user.password_hash):
             user.locked_until = None
             db.session.commit()
             return "login successful"
-        if not bcrypt.checkpw(password.encode("utf-8"), user.password_hash):
-            if not user.trys < 5:
-                return("Wrong password, try again")
-            else:
-                user.locked_until = dt.datetime.today() + dt.timedelta(minutes=15)
-                db.session.commit()
-                return "wrong password"
+        user.trys += 1
+        if user.trys >= 5: 
+            user.locked_until = dt.datetime.today() + dt.timedelta(minutes=15)
+            db.session.commit()
+            return render_template("login.html", fehlermeldung="wrong password")
+        db.session.commit()
+        return render_template("login.html", fehlermeldung="wrong password")
+
     else:
         return render_template("login.html")
 
