@@ -1,10 +1,14 @@
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, session
 from flask_sqlalchemy import SQLAlchemy
 import bcrypt
 import datetime as dt
+from dotenv import load_dotenv
+import os
 
 app = Flask(__name__)
+app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///users.db"
+
 db = SQLAlchemy(app)
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -20,14 +24,14 @@ def register():
         username = request.form["username"]
         user_exists = User.query.filter_by(username=username).first()
         if user_exists:
-            return "Username already taken"
+            return render_template("register.html", fehlermeldung = "Username already taken")
         password = request.form["password"]
 
         if len(password) < 15:
-            return("password to short")
+            return render_template("register.html", fehlermeldung = "password to short")
         has_sonderzeichen = any(zeichen in password for zeichen in sonderzeichen)
         if not has_sonderzeichen:
-            return("password doesn't contain sonderzeichen")
+            return render_template("register.html", fehlermeldung = "password doesn't contain sonderzeichen")
 
         password_hash = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
         password_again = request.form["repeat_password"]
@@ -55,8 +59,10 @@ def login():
             user.trys = 0
         if bcrypt.checkpw(password.encode("utf-8"), user.password_hash):
             user.locked_until = None
+            session["username"] = username
             db.session.commit()
             return "login successful"
+        
         user.trys += 1
         if user.trys >= 5: 
             user.locked_until = dt.datetime.today() + dt.timedelta(minutes=15)
@@ -67,8 +73,12 @@ def login():
 
     else:
         return render_template("login.html")
-
-
+@app.route("/vault", methods = ["GET"])
+def vault():
+    if "username" not in session:
+        return render_template("login.html")
+    else:
+        return render_template("vault.html")
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
