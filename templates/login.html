@@ -4,17 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <form method="POST" action="/login">
-    <label>Enter your username</label>
-    <input type = "text" name = "username">
-    <label>Enter your password</label>
-    <input type = "password" name = "password">
-    {{ fehlermeldung }}
-    <label>send</label>
-    <input type = "submit">
-</form>
+    <div class = field>
+        <form method="POST" action="/login">
+        <input type = "text" name = "username" placeholder = "Enter your username" value="{{ username }}">
+        <input type = "password" name = "password" placeholder = "Enter your password">
+        {{ fehlermeldung }}
+        <input type = "submit" placeholder = "login">
+        </form>
+    </div>
+
     
 </body>
 </html>

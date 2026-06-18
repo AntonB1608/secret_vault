@@ -28,10 +28,10 @@ def register():
         password = request.form["password"]
 
         if len(password) < 15:
-            return render_template("register.html", fehlermeldung = "password to short")
+            return render_template("register.html", fehlermeldung = "password to short", username=username)
         has_sonderzeichen = any(zeichen in password for zeichen in sonderzeichen)
         if not has_sonderzeichen:
-            return render_template("register.html", fehlermeldung = "password doesn't contain sonderzeichen")
+            return render_template("register.html", fehlermeldung = "password doesn't contain sonderzeichen", username=username)
 
         password_hash = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
         password_again = request.form["repeat_password"]
@@ -39,9 +39,9 @@ def register():
             new_user = User(username=username, password_hash=password_hash)
             db.session.add(new_user)           
             db.session.commit()
-            return username
+            return redirect("/vault")
         else:
-            return render_template("register.html", fehlermeldung = "passwords dont match")
+            return render_template("register.html", fehlermeldung = "passwords dont match", username=username)
     else:
         return render_template("register.html")
 @app.route("/login", methods=["POST", "GET"])
@@ -57,6 +57,7 @@ def login():
             return render_template("login.html", fehlermeldung=f"You are blocked until {user.locked_until}")
         if user.locked_until and current_date_time > user.locked_until:
             user.trys = 0
+            db.session.commit()
         if bcrypt.checkpw(password.encode("utf-8"), user.password_hash):
             user.locked_until = None
             session["username"] = username
@@ -67,10 +68,9 @@ def login():
         if user.trys >= 5: 
             user.locked_until = dt.datetime.today() + dt.timedelta(minutes=15)
             db.session.commit()
-            return render_template("login.html", fehlermeldung="wrong password")
+            return render_template("login.html", fehlermeldung=f"wrong password, you are blocked until {user.locked_until}", username=username)            
         db.session.commit()
-        return render_template("login.html", fehlermeldung="wrong password")
-
+        return render_template("login.html", fehlermeldung="wrong password", username=username)
     else:
         return render_template("login.html")
 @app.route("/vault", methods = ["GET"])
@@ -78,7 +78,7 @@ def vault():
     if "username" not in session:
         return render_template("login.html")
     else:
-        return render_template("vault.html")
+        return render_template("vault.html", username=session["username"])
 @app.route("/logout", methods = ["GET"])
 def logout():      
     session.pop("username", None)
