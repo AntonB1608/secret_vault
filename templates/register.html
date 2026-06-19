@@ -12,12 +12,13 @@
     </div>
     <div class = register>
         <form method="POST" action="/register">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class = field>
                 <label></label>
                 <input type="text" name="username" placeholder="Enter a username">
-                <input type = "password" name = "password" placeholder = "Enter a password" {{ fehlermeldung }}>
-                <input type = "password" name = "repeat_password" placeholder = "Repeat your password" {{ fehlermeldung }}>
-                <input type = "submit" placeholder = "Send">
+                <input type = "password" name = "password" placeholder = "Enter a password">
+                <input type = "password" name = "repeat_password" placeholder = "Repeat your password" >
+                <input type = "submit" value = "Send" placeholder = "Send">
                 {{ fehlermeldung }}
             </div>
             

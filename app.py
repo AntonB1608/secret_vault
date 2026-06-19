@@ -4,10 +4,13 @@ import bcrypt
 import datetime as dt
 from dotenv import load_dotenv
 import os
+from flask_wtf.csrf import CSRFProtect
 
+load_dotenv()
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///users.db"
+csrf = CSRFProtect(app)
 
 db = SQLAlchemy(app)
 class User(db.Model):
