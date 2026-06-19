@@ -15,7 +15,7 @@ csrf = CSRFProtect(app)
 db = SQLAlchemy(app)
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
+    username = db.Column(db.String(20), unique=True, nullable=False)
     password_hash = db.Column(db.String(200), nullable=False)
     trys = db.Column(db.Integer, default=0)
     locked_until = db.Column(db.DateTime, nullable=True)
@@ -25,26 +25,29 @@ def register():
     sonderzeichen = "!@#$%^&*()_+-=[]{}|;:',.<>?/~`"
     if request.method == "POST":
         username = request.form["username"]
+        password = request.form["password"]
+        password_again = request.form["repeat_password"]
+        if len(username) > 20:
+            return render_template("register.html", fehlermeldung="username too long")
         user_exists = User.query.filter_by(username=username).first()
         if user_exists:
-            return render_template("register.html", fehlermeldung = "Username already taken")
-        password = request.form["password"]
+            
+            return render_template("register.html", fehlermeldung = "Username already taken", password=password)
 
         if len(password) < 15:
             return render_template("register.html", fehlermeldung = "password to short", username=username)
         has_sonderzeichen = any(zeichen in password for zeichen in sonderzeichen)
         if not has_sonderzeichen:
             return render_template("register.html", fehlermeldung = "password doesn't contain sonderzeichen", username=username)
-
         password_hash = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
-        password_again = request.form["repeat_password"]
+        
         if password == password_again:
             new_user = User(username=username, password_hash=password_hash)
             db.session.add(new_user)           
             db.session.commit()
             return redirect("/vault")
         else:
-            return render_template("register.html", fehlermeldung = "passwords dont match", username=username)
+            return render_template("register.html", fehlermeldung = "passwords dont match", username=username, password=password)
     else:
         return render_template("register.html")
 @app.route("/login", methods=["POST", "GET"])
